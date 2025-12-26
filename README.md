@@ -2,11 +2,11 @@
 
 Performance benchmarks comparing fused and unfused CUDA kernels across four different element-wise operations.
 
-## 📋 Overview
+## Overview
 
 This repository contains benchmarking code and results for analyzing the performance impact of kernel fusion in CUDA. Kernel fusion combines multiple GPU operations into a single kernel launch, potentially reducing memory traffic and kernel launch overhead.
 
-## 🎯 Benchmarked Operations
+## Benchmarked Operations
 
 1. **Element-wise Addition** (`compare_add.cu`)
    - Unfused: Add kernel → Copy kernel
