@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #define BLOCK_SIZE 256
-#define WARMUP_ITERS 100
+#define WARMUP_ITERS 10
 #define BENCHMARK_ITERS 100
 
 __global__ void map_kernel(const float* a, const float* b, float* temp, int n) {
