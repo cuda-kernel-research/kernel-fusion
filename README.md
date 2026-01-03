@@ -38,6 +38,11 @@ Each benchmark pair implements the same computation both unfused (multiple kerne
    - Fused: Single map-reduce kernel
    - Memory transfers: 4 → 2
 
+5. **Map-Reduce (Block-level)** (`map_reduce_naive_vs_optimized.cu`)
+   - Unfused: Map kernel → Block-level reduce kernel (shared memory + atomics)
+   - Fused: Single map-reduce kernel with block-level reduction
+   - Memory transfers: 4 → 2
+
 These operations were chosen to represent common element-wise and reduction patterns encountered in GPU-accelerated workloads.
 
 ## Repository Structure
@@ -68,6 +73,7 @@ nvcc -O3 src/compare_add.cu -o compare_add
 nvcc -O3 src/compare_fma.cu -o compare_fma
 nvcc -O3 src/compare_relu.cu -o compare_relu
 nvcc -O3 src/compare_mapreduce.cu -o compare_mapreduce
+nvcc -O3 src/map_reduce_naive_vs_optimized.cu -o map_reduce_naive_vs_optimized
 ```
 
 ### Execution
@@ -79,6 +85,7 @@ Run each benchmark binary to collect performance results:
 ./compare_fma
 ./compare_relu
 ./compare_mapreduce
+./map_reduce_naive_vs_optimized
 ```
 
 Results will be written to stdout or saved via provided scripts in `scripts/`.

@@ -260,11 +260,11 @@ if __name__ == "__main__":
     print("Map-reduce results:")
 
     # Values taken from the provided table
-    mr_unfused_time = [6.12, 24.49, 213.73, 1901.69, 19524.81]
-    mr_fused_time = [4.59, 20.25, 207.26, 1945.91, 19398.93]
-    mr_speedup = [1.33, 1.21, 1.03, 0.98, 1.01]
-    mr_bw_unfused = [2.68, 6.69, 7.67, 8.62, 8.39]
-    mr_bw_fused = [1.79, 4.04, 3.95, 4.21, 4.22]
+    mr_unfused_time = [5.94, 20.38, 169.73, 1670.38, 16675.51]
+    mr_fused_time = [4.12, 19.14, 167.78, 1656.19, 16533.86]
+    mr_speedup = [1.44, 1.06, 1.01, 1.01, 1.01]
+    mr_bw_unfused = [2.76, 8.04, 9.65, 9.81, 9.83]
+    mr_bw_fused = [1.99, 4.28, 4.88, 4.95, 4.95]
 
     mr_speedup_calc = [u / f for u, f in zip(mr_unfused_time, mr_fused_time)]
     print("Map-reduce speedup:", mr_speedup)
@@ -272,9 +272,27 @@ if __name__ == "__main__":
 
     plot_time_graph(sizes, mr_unfused_time, mr_fused_time, fig_name="map_reduce_time.png")
     # Example: set explicit max so labels are comfortably below the top
-    plot_speedup_bars(sizes, mr_speedup, fig_name="map_reduce_speedup.png", y_max=1.5)
+    plot_speedup_bars(sizes, mr_speedup, fig_name="map_reduce_speedup.png", y_max=1.6)
     plot_bandwidth_bars(sizes, mr_bw_unfused, mr_bw_fused, fig_name="map_reduce_bandwidth.png")
     
 
+    # Map-reduce
+    print("Map-reduce block-level reduction results:")
+    
+    # Values taken from the provided table
+    mr_block_unfused_time = [4.84, 4.86, 6.38, 30.50, 271.47]
+    mr_block_fused_time = [3.24, 3.37, 4.44, 17.11, 133.99]
+    mr_block_speedup = [1.49, 1.44, 1.44, 1.78, 2.03]
+    mr_block_bw_unfused = [3.38, 33.68, 256.82, 537.09, 603.52]
+    mr_block_bw_fused = [2.53, 24.32, 184.33, 478.76, 611.39]
+
+    mr_bl_speedup_calc = [u / f for u, f in zip(mr_block_unfused_time, mr_block_fused_time)]
+    print("Map-reduce block-level speedup:", mr_bl_speedup_calc)
+    print("Map-reduce block-level speedup (calculated):", mr_bl_speedup_calc)
+
+    plot_time_graph(sizes, mr_block_unfused_time, mr_block_fused_time, fig_name="map_reduce_block_level_time.png")
+    plot_speedup_bars(sizes, mr_block_speedup, fig_name="map_reduce_block_level_speedup.png", y_max=2.5)
+    plot_bandwidth_bars(sizes, mr_block_bw_unfused, mr_block_bw_fused, fig_name="map_reduce_block_level_bandwidth.png")
+    
 
 
