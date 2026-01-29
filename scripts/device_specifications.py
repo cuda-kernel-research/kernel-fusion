@@ -31,17 +31,18 @@ from typing import Dict, Optional, Tuple
 
 
 def run(cmd, timeout=30) -> Tuple[int, str, str]:
-    """Run a command and return (rc, stdout, stderr)."""
+    """Run a command and return (rc, stdout, stderr). Compatible with Python 3.6."""
     try:
         p = subprocess.run(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True,
             timeout=timeout,
             check=False,
         )
-        return p.returncode, p.stdout.strip(), p.stderr.strip()
+        stdout = p.stdout.decode("utf-8", errors="replace") if isinstance(p.stdout, (bytes, bytearray)) else (p.stdout or "")
+        stderr = p.stderr.decode("utf-8", errors="replace") if isinstance(p.stderr, (bytes, bytearray)) else (p.stderr or "")
+        return p.returncode, stdout.strip(), stderr.strip()
     except Exception as e:
         return 1, "", str(e)
 
@@ -90,11 +91,23 @@ def parse_free_h(text: str) -> Dict[str, str]:
     return out
 
 
+def _supported_nvidia_smi_fields() -> Optional[set]:
+    rc, out, err = run(["nvidia-smi", "--help-query-gpu"])
+    if rc != 0 or not out:
+        return None
+    fields = set()
+    for line in out.splitlines():
+        m = re.match(r"\s*([a-zA-Z0-9_.]+)\s*[-:]", line)
+        if m:
+            fields.add(m.group(1).strip())
+    return fields or None
+
+
 def nvidia_smi_query() -> Dict[str, str]:
     """
     Return a dict with key fields from nvidia-smi query interface.
     """
-    fields = [
+    desired = [
         "name",
         "memory.total",
         "driver_version",
@@ -107,6 +120,17 @@ def nvidia_smi_query() -> Dict[str, str]:
         "power.limit",
         "power.max_limit",
     ]
+    supported = _supported_nvidia_smi_fields()
+    if supported:
+        fields = [f for f in desired if f in supported]
+    else:
+        fields = [
+            "name",
+            "memory.total",
+            "driver_version",
+            "pci.bus_id",
+            "power.limit",
+        ]
     cmd = [
         "nvidia-smi",
         f"--query-gpu={','.join(fields)}",
@@ -142,6 +166,19 @@ def nvcc_version() -> Dict[str, str]:
     return {"nvcc_path": nvcc, "nvcc_version_text": out or err}
 
 
+def _cuda_root_from_nvcc(nvcc_path: str) -> Optional[str]:
+    if not nvcc_path:
+        return None
+    try:
+        p = Path(nvcc_path).resolve()
+        # Usually .../bin/nvcc -> CUDA root is parent of bin
+        if p.parent.name == "bin":
+            return str(p.parent.parent)
+    except Exception:
+        return None
+    return None
+
+
 def find_devicequery() -> Optional[str]:
     # Common locations
     candidates = [
@@ -162,6 +199,13 @@ def find_devicequery() -> Optional[str]:
         "/usr/local/cuda/samples/1_Utilities/deviceQuery",
         "/opt/cuda/samples/1_Utilities/deviceQuery",
     ]
+
+    # Try CUDA root from nvcc
+    nvcc = which("nvcc")
+    cuda_root = _cuda_root_from_nvcc(nvcc) if nvcc else None
+    if cuda_root:
+        sample_dirs.append(os.path.join(cuda_root, "samples", "1_Utilities", "deviceQuery"))
+        sample_dirs.append(os.path.join(cuda_root, "extras", "demo_suite"))
     for d in sample_dirs:
         exe = os.path.join(d, "deviceQuery")
         if os.path.isfile(exe) and os.access(exe, os.X_OK):

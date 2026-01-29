@@ -11,4 +11,4 @@ pwd; hostname ; date
 
 cd ~/cudafusion/kernel-fusion/scripts || exit 1
 
-~/cudafusion/kernel-fusion/venv/bin/python device_specifications.py
+~/cudafusion/kernel-fusion/venv/bin/python device_specifications.py --out hw_dump_a100
