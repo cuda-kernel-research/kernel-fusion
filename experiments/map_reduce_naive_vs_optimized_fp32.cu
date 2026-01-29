@@ -201,8 +201,8 @@ int main() {
     const int sizes[] = {1024, 10240, 102400, 1024000, 10240000, 102400000};
     const int num_sizes = sizeof(sizes) / sizeof(sizes[0]);
     
-    FILE* results_file = fopen("results_map_reduce_fp16.txt", "w");
-    FILE* data_file = fopen("data_map_reduce_fp16.csv", "a");
+    FILE* results_file = fopen("results_map_reduce_fp32.txt", "w");
+    FILE* data_file = fopen("data_map_reduce_fp32.csv", "a");
 
     if (results_file == NULL || data_file == NULL) {
         printf("ERROR: Cannot open results.txt\n");
