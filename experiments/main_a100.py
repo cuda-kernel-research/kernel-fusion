@@ -69,7 +69,7 @@ def print_statistics(data, title):
     print(f"{title} - Statistics from 5 runs")
     print('='*90)
     print(f"{'Size':<10} | {'Unfused (μs)':<25} | {'Fused (μs)':<25} | {'Speedup'}")
-    print(f"{'':10} | {'mean ± std (CV%)':<25} | {'mean ± std (CV%)':<25} |")
+    print(f"{'':10} | {'mean ± std':<25} | {'mean ± std':<25} |")
     print('-'*90)
     
     for size in sorted(data.keys()):
@@ -78,14 +78,11 @@ def print_statistics(data, title):
         
         u_m, u_s = np.mean(u), np.std(u, ddof=1)
         f_m, f_s = np.mean(f), np.std(f, ddof=1)
-        
-        u_cv = (u_s / u_m) * 100
-        f_cv = (f_s / f_m) * 100
-        
+
         speedup = u_m / f_m
-        
-        print(f"{size:<10} | {u_m:6.2f} ± {u_s:4.2f} ({u_cv:4.1f}%) | "
-              f"{f_m:6.2f} ± {f_s:4.2f} ({f_cv:4.1f}%) | {speedup:6.2f}x")
+
+        print(f"{size:<10} | {u_m:6.2f} ± {u_s:4.2f} | "
+              f"{f_m:6.2f} ± {f_s:4.2f} | {speedup:6.2f}x")
 
 def save_stats(data, filename, title):
     """Save statistics to CSV"""
@@ -108,6 +105,10 @@ if __name__ == "__main__":
         ("compare_add_fp16.cu", "add_fp16", "data_add_fp16.csv", "Add FP16"),
         ("compare_fma_fp32.cu", "fma_fp32", "data_fma_fp32.csv", "FMA FP32"),
         ("compare_fma_fp16.cu", "fma_fp16", "data_fma_fp16.csv", "FMA FP16"),
+        ("relu_fp32.cu", "relu_fp32", "data_relu_fp32.csv", "ReLU FP32"),
+        ("relu_fp16.cu", "relu_fp16", "data_relu_fp16.csv", "ReLU FP16"),
+        ("map_reduce_naive_vs_optimized_fp32.cu", "map_reduce_fp32", "data_map_reduce_fp32.csv", "Map Reduce FP32"),
+        ("map_reduce_naive_vs_optimized_fp16.cu", "map_reduce_fp16", "data_map_reduce_fp16.csv", "Map Reduce FP16"),
     ]
 
     for source, exe, data_file, title in benchmarks:
