@@ -10,7 +10,7 @@ def run_benchmark_5_times(source_file, executable, data_filename):
     # Compile
     print(f"Compiling {source_file}...")
     result = subprocess.run(
-        ["nvcc", "-O3", "-arch=sm_75", source_file, "-o", executable],
+        ["nvcc", "-O3", "-arch=sm_80", source_file, "-o", executable],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
@@ -102,29 +102,30 @@ def save_stats(data, filename, title):
             f.write(f"{size},{u_m:.2f},{u_s:.2f},{f_m:.2f},{f_s:.2f},{u_m/f_m:.2f}\n")
 
 # ===== MAIN =====
-benchmarks = [
-    ("compare_add_fp32.cu", "add_fp32", "data_add_fp32.csv", "Add FP32"),
-    ("compare_add_fp16.cu", "add_fp16", "data_add_fp16.csv", "Add FP16"),
-    ("compare_fma_fp32.cu", "fma_fp32", "data_fma_fp32.csv", "FMA FP32"),
-    ("compare_fma_fp16.cu", "fma_fp16", "data_fma_fp16.csv", "FMA FP16"),
-]
+if __name__ == "__main__":
+    benchmarks = [
+        ("compare_add_fp32.cu", "add_fp32", "data_add_fp32.csv", "Add FP32"),
+        ("compare_add_fp16.cu", "add_fp16", "data_add_fp16.csv", "Add FP16"),
+        ("compare_fma_fp32.cu", "fma_fp32", "data_fma_fp32.csv", "FMA FP32"),
+        ("compare_fma_fp16.cu", "fma_fp16", "data_fma_fp16.csv", "FMA FP16"),
+    ]
 
-for source, exe, data_file, title in benchmarks:
-    print(f"\n{'#'*90}")
-    print(f"# {title}")
-    print('#'*90)
-    
-    # Run 5 times
-    data = run_benchmark_5_times(source, exe, data_file)
-    
-    if not data:
-        continue
-    
-    # Print stats
-    print_statistics(data, title)
-    
-    # Save stats
-    save_stats(data, f"stats_{exe}.csv", title)
-    print(f" Saved to stats_{exe}.csv")
+    for source, exe, data_file, title in benchmarks:
+        print(f"\n{'#'*90}")
+        print(f"# {title}")
+        print('#'*90)
+        
+        # Run 5 times
+        data = run_benchmark_5_times(source, exe, data_file)
+        
+        if not data:
+            continue
+        
+        # Print stats
+        print_statistics(data, title)
+        
+        # Save stats
+        save_stats(data, f"stats_{exe}.csv", title)
+        print(f" Saved to stats_{exe}.csv")
 
-print("\n Done!")
+    print("\n Done!")
