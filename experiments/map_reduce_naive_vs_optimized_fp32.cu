@@ -202,10 +202,11 @@ int main() {
     const int num_sizes = sizeof(sizes) / sizeof(sizes[0]);
     
     FILE* results_file = fopen("results_map_reduce_fp32.txt", "w");
-    FILE* data_file = fopen("data_map_reduce_fp32.csv", "a");
+    FILE* data_file_naive = fopen("data_map_reduce_fp32_naive.csv", "a");
+    FILE* data_file_block = fopen("data_map_reduce_fp32_block.csv", "a");
 
-    if (results_file == NULL || data_file == NULL) {
-        printf("ERROR: Cannot open results.txt\n");
+    if (results_file == NULL || data_file_naive == NULL || data_file_block == NULL) {
+        printf("ERROR: Cannot open results files\n");
         return 1;
     }
 
@@ -323,7 +324,8 @@ int main() {
             bw_fused,
             memory_saved_kib);
         
-        fprintf(data_file, "%d,%.2f,%.2f\n", n, time_unfused, time_fused);
+        fprintf(data_file_naive, "%d,%.2f,%.2f,%.2f,%.2f,%.2f\n", n, time_unfused, time_fused, speedup, bw_unfused, bw_fused);
+
 
         cudaFree(d_a);
         cudaFree(d_b);
@@ -449,7 +451,8 @@ int main() {
             bw_fused,
             memory_saved_kib);
             
-        fprintf(data_file, "%d,%.2f,%.2f\n", n, time_unfused, time_fused);
+        fprintf(data_file_block, "%d,%.2f,%.2f,%.2f,%.2f,%.2f\n", n, time_unfused, time_fused, speedup, bw_unfused, bw_fused);
+
 
         cudaFree(d_a);
         cudaFree(d_b);
@@ -458,7 +461,8 @@ int main() {
         delete[] h_a;
         delete[] h_b;
     }
-    fclose(data_file);
+    fclose(data_file_naive);
+    fclose(data_file_block);
     fclose(results_file);
     return 0;
 }
