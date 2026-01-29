@@ -4,8 +4,10 @@ import csv
 import numpy as np
 import os
 
-def run_benchmark_5_times(source_file, executable, data_filename):
-    """Compile and run benchmark 5 times"""
+NUMBER_OF_RUNS = 10
+
+def run_benchmark_N_times(source_file, executable, data_filename):
+    """Compile and run benchmark NUMBER_OF_RUNS times"""
     
     # Compile
     print(f"Compiling {source_file}...")
@@ -25,9 +27,9 @@ def run_benchmark_5_times(source_file, executable, data_filename):
     if os.path.exists(data_filename):
         os.remove(data_filename)
     
-    # Run 5 times (C++ will append to data file each time)
-    for i in range(5):
-        print(f"Run {i+1}/5...", end=' ', flush=True)
+    # Run NUMBER_OF_RUNS times (C++ will append to data file each time)
+    for i in range(NUMBER_OF_RUNS):
+        print(f"Run {i+1}/{NUMBER_OF_RUNS}...", end=' ', flush=True)
         subprocess.run([f"./{executable}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print("correct")
     
@@ -66,7 +68,7 @@ def read_all_data(filename):
 def print_statistics(data, title):
     """Print statistics table"""
     print(f"\n{'='*90}")
-    print(f"{title} - Statistics from 5 runs")
+    print(f"{title} - Statistics from {NUMBER_OF_RUNS} runs")
     print('='*90)
     print(f"{'Size':<10} | {'Unfused (μs)':<25} | {'Fused (μs)':<25} | {'Speedup'}")
     print(f"{'':10} | {'mean ± std':<25} | {'mean ± std':<25} |")
@@ -107,8 +109,8 @@ if __name__ == "__main__":
         ("compare_fma_fp16.cu", "fma_fp16", "data_fma_fp16.csv", "FMA FP16"),
         ("relu_fp32.cu", "relu_fp32", "data_relu_fp32.csv", "ReLU FP32"),
         ("relu_fp16.cu", "relu_fp16", "data_relu_fp16.csv", "ReLU FP16"),
-        ("map_reduce_naive_vs_optimized_fp32.cu", "map_reduce_fp32", "data_map_reduce_fp32.csv", "Map Reduce FP32"),
-        ("map_reduce_naive_vs_optimized_fp16.cu", "map_reduce_fp16", "data_map_reduce_fp16.csv", "Map Reduce FP16"),
+        # ("map_reduce_naive_vs_optimized_fp32.cu", "map_reduce_fp32", "data_map_reduce_fp32.csv", "Map Reduce FP32"),
+        # ("map_reduce_naive_vs_optimized_fp16.cu", "map_reduce_fp16", "data_map_reduce_fp16.csv", "Map Reduce FP16"),
     ]
 
     for source, exe, data_file, title in benchmarks:
@@ -116,8 +118,8 @@ if __name__ == "__main__":
         print(f"# {title}")
         print('#'*90)
         
-        # Run 5 times
-        data = run_benchmark_5_times(source, exe, data_file)
+        # Run NUMBER_OF_RUNS times
+        data = run_benchmark_N_times(source, exe, data_file)
         
         if not data:
             continue

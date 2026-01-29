@@ -7,7 +7,7 @@ import os
 NUMBER_OF_RUNS = 10
 
 def run_benchmark_N_times(source_file, executable, data_filename):
-    """Compile and run benchmark 10 times"""
+    """Compile and run benchmark NUMBER_OF_RUNS times"""
     
     # Compile
     print(f"Compiling {source_file}...")
@@ -26,7 +26,7 @@ def run_benchmark_N_times(source_file, executable, data_filename):
     if os.path.exists(data_filename):
         os.remove(data_filename)
     
-    # Run 10 times (C++ will append to data file each time)
+    # Run NUMBER_OF_RUNS times (C++ will append to data file each time)
     for i in range(NUMBER_OF_RUNS):
         print(f"Run {i+1}/{NUMBER_OF_RUNS}...", end=' ', flush=True)
         subprocess.run([f"./{executable}"], capture_output=True)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         print(f"# {title}")
         print('#'*90)
         
-        # Run 10 times
+        # Run NUMBER_OF_RUNS times
         data = run_benchmark_N_times(source, exe, data_file)
         
         if not data:
