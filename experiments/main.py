@@ -11,7 +11,8 @@ def run_benchmark_5_times(source_file, executable, data_filename):
     print(f"Compiling {source_file}...")
     result = subprocess.run(
         ["nvcc", "-O3", "-arch=sm_75", source_file, "-o", executable],
-        capture_output=True
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
     )
     
     if result.returncode != 0:
@@ -27,7 +28,7 @@ def run_benchmark_5_times(source_file, executable, data_filename):
     # Run 5 times (C++ will append to data file each time)
     for i in range(5):
         print(f"Run {i+1}/5...", end=' ', flush=True)
-        subprocess.run([f"./{executable}"], capture_output=True)
+        subprocess.run([f"./{executable}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print("correct")
     
     # Clean up executable
