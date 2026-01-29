@@ -200,15 +200,15 @@ int main() {
             memory_saved_kib);
         
         fprintf(results_file, "%-10d | %17.2f | %15.2f | %8.2fx | %12.2f | %10.2f | %12.1f\n",
-        n,
-        time_unfused,
-        time_fused,
-        speedup,
-        bw_unfused,
-        bw_fused,
-        memory_saved_kib);
+            n,
+            time_unfused,
+            time_fused,
+            speedup,
+            bw_unfused,
+            bw_fused,
+            memory_saved_kib);
 
-        fprintf(data_file, "%d,%.2f,%.2f\n", n, time_unfused, time_fused); 
+        fprintf(data_file, "%d,%.2f,%.2f,%.2f,%.2f,%.2f\n", n, time_unfused, time_fused, speedup, bw_unfused, bw_fused);
 
         if (!correct) {
             printf("WARNING: Verification failed for size %d\n", n);

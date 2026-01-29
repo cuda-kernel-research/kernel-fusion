@@ -217,7 +217,8 @@ int main() {
             memory_saved_kib);
 
         
-        fprintf(data_file, "%d,%.2f,%.2f\n", n, time_unfused, time_fused); 
+        fprintf(data_file, "%d,%.2f,%.2f,%.2f,%.2f,%.2f\n", n, time_unfused, time_fused, speedup, bw_unfused, bw_fused);
+
         delete[] h_result;
 
         if (!correct) {
