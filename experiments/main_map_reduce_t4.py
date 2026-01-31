@@ -85,44 +85,7 @@ def read_all_data(filename):
     
     return data
 
-def run_benchmark_mixed_precision(source_file, executable, data_filename):
-    """Compile and run mixed precision benchmark NUMBER_OF_RUNS times"""
-    
-    # Compile
-    print(f"Compiling {source_file}...")
-    result = subprocess.run(
-        ["nvcc", "-O3", "-arch=sm_75", source_file, "-o", executable],
-        capture_output=True
-    )
-    
-    if result.returncode != 0:
-        print("ERROR: Compilation failed!")
-        print(result.stderr.decode())
-        print(result.stdout.decode())
-        return None
-    
-    print("✓ Compiled\n")
-    
-    # Delete old data file (clean start)
-    if os.path.exists(data_filename):
-        os.remove(data_filename)
-    
-    # Run NUMBER_OF_RUNS times (C++ will append to data file each time)
-    for i in range(NUMBER_OF_RUNS):
-        print(f"Run {i+1}/{NUMBER_OF_RUNS}...", end=' ', flush=True)
-        result = subprocess.run([f"./{executable}"], capture_output=True)
-        if result.returncode != 0:
-            print(f"ERROR (exit code {result.returncode})!")
-            print("STDERR:", result.stderr.decode())
-            print("STDOUT:", result.stdout.decode())
-            return None
-        print("✓")
-    
-    # Clean up executable
-    subprocess.run(["rm", executable])
-    
-    # Read data from single file
-    return read_all_data(data_filename)
+
 
 def print_statistics(data, title):
     """Print statistics table"""
@@ -192,9 +155,10 @@ if __name__ == "__main__":
          "data_map_reduce_fp16_naive.csv", "data_map_reduce_fp16_block.csv", "Map Reduce FP16"),
     ]
     
-    # Benchmarks with single output (mixed precision)
+    # Mixed precision benchmark (naive and block-level output)
     mixed_benchmarks = [
-        ("map_reduce_mix_precision.cu", "map_reduce_mixed", "data_map_reduce_mixed.csv", "Map Reduce Mixed Precision"),
+        ("map_reduce_mix_precision.cu", "map_reduce_mixed", 
+         "data_map_reduce_mixed_naive.csv", "data_map_reduce_mixed_block.csv", "Map Reduce Mixed Precision"),
     ]
 
     # Process dual-output map_reduce benchmarks
@@ -220,22 +184,27 @@ if __name__ == "__main__":
         save_stats(data_block, f"stats_{exe}_block.csv", f"{title} - BLOCK-LEVEL")
         print(f"✓ Saved to stats_{exe}_block.csv")
     
-    # Process single-output mixed precision benchmarks
-    for source, exe, data_file, title in mixed_benchmarks:
+    # Process mixed precision benchmark
+    for source, exe, data_file_naive, data_file_block, title in mixed_benchmarks:
         print(f"\n{'#'*90}")
         print(f"# {title}")
         print('#'*90)
         
         # Run NUMBER_OF_RUNS times
-        data = run_benchmark_mixed_precision(source, exe, data_file)
+        data_naive, data_block = run_benchmark_n_times(source, exe, data_file_naive, data_file_block)
         
-        if not data:
+        if not data_naive or not data_block:
             print("ERROR: No data collected!")
             continue
         
-        # Print and save stats
-        print_statistics(data, title)
-        save_stats(data, f"stats_{exe}.csv", title)
-        print(f"✓ Saved to stats_{exe}.csv")
+        # Print and save NAIVE stats
+        print_statistics(data_naive, f"{title} - NAIVE")
+        save_stats(data_naive, f"stats_{exe}_naive.csv", f"{title} - NAIVE")
+        print(f"✓ Saved to stats_{exe}_naive.csv")
+        
+        # Print and save BLOCK-LEVEL stats
+        print_statistics(data_block, f"{title} - BLOCK-LEVEL")
+        save_stats(data_block, f"stats_{exe}_block.csv", f"{title} - BLOCK-LEVEL")
+        print(f"✓ Saved to stats_{exe}_block.csv")
 
     print("\n✓ Done!")
