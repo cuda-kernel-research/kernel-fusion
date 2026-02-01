@@ -213,9 +213,16 @@ int main() {
     const int sizes[] = {1024, 10240, 102400, 1024000, 10240000, 102400000};
     const int num_sizes = sizeof(sizes) / sizeof(sizes[0]);
     
-    FILE* data_file = fopen("data_map_reduce_mixed.csv", "a");
-    if (data_file == NULL) {
-        printf("ERROR: Cannot open data file!\n");
+    FILE* data_file_naive = fopen("data_map_reduce_mixed_naive.csv", "a");
+    if (data_file_naive == NULL) {
+        printf("ERROR: Cannot open naive data file!\n");
+        return 1;
+    }
+    
+    FILE* data_file_block = fopen("data_map_reduce_mixed_block.csv", "a");
+    if (data_file_block == NULL) {
+        printf("ERROR: Cannot open block data file!\n");
+        fclose(data_file_naive);
         return 1;
     }
     
@@ -278,8 +285,8 @@ int main() {
                n, time_unfused_naive, time_fused_naive, speedup_naive, 
                bw_unfused_naive, bw_fused_naive, memory_saved_kib);
         
-        // Append to data file
-        fprintf(data_file, "%d,%.2f,%.2f,%.2f,%.2f,%.2f\n", n, time_unfused_naive, time_fused_naive, speedup_naive, bw_unfused_naive, bw_fused_naive);
+        // Append to naive data file
+        fprintf(data_file_naive, "%d,%.2f,%.2f,%.2f,%.2f,%.2f\n", n, time_unfused_naive, time_fused_naive, speedup_naive, bw_unfused_naive, bw_fused_naive);
         
         cudaFree(d_a);
         cudaFree(d_b);
@@ -350,8 +357,8 @@ int main() {
                n, time_unfused_block, time_fused_block, speedup_block, 
                bw_unfused_block, bw_fused_block, memory_saved_kib);
         
-        // Append to data file
-        fprintf(data_file, "%d,%.2f,%.2f,%.2f,%.2f,%.2f\n", n, time_unfused_block, time_fused_block, speedup_block, bw_unfused_block, bw_fused_block);
+        // Append to block data file
+        fprintf(data_file_block, "%d,%.2f,%.2f,%.2f,%.2f,%.2f\n", n, time_unfused_block, time_fused_block, speedup_block, bw_unfused_block, bw_fused_block);
         
         cudaFree(d_a);
         cudaFree(d_b);
@@ -363,8 +370,9 @@ int main() {
         delete[] h_b_float;
     }
     
-    fclose(data_file);
-    printf("\n✓ Data appended to data_map_reduce_mixed.csv\n");
+    fclose(data_file_naive);
+    fclose(data_file_block);
+    printf("\nData appended to data_map_reduce_mixed_naive.csv and data_map_reduce_mixed_block.csv\n");
     
     return 0;
 }
