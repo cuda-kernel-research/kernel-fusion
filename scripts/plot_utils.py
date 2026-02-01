@@ -56,7 +56,7 @@ def plot_time_graph_combined(
     output_dir="."
 ):
     """Plot time comparison with FP32 and FP16 on same graph with error bars."""
-    plt.figure(figsize=(12, 7))
+    plt.figure(figsize=(16, 7))
 
     # FP32 lines
     plt.errorbar(sizes, fp32_unfused, yerr=fp32_unfused_std, marker="o", linewidth=2,
@@ -76,7 +76,7 @@ def plot_time_graph_combined(
     plt.xlabel("Array size (number of elements)", fontsize=AXIS_LABEL_FONTSIZE)
     plt.ylabel("Execution time (μs)", fontsize=AXIS_LABEL_FONTSIZE)
 
-    plt.xticks(sizes, SIZE_LABELS, fontsize=TICK_LABEL_FONTSIZE)
+    plt.xticks(sizes, SIZE_LABELS, fontsize=TICK_LABEL_FONTSIZE, rotation=45)
     plt.yticks(fontsize=TICK_LABEL_FONTSIZE)
 
     plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
@@ -103,7 +103,7 @@ def plot_speedup_combined(
     width = 0.3
     gap = 0.06  # gap between FP32 and FP16 bars
 
-    plt.figure(figsize=(12, 7))
+    plt.figure(figsize=(16, 7))
 
     bars_fp32 = plt.bar([i - width/2 - gap/2 for i in x], fp32_speedup, width=width,
                         yerr=fp32_speedup_std, capsize=3,
@@ -117,7 +117,7 @@ def plot_speedup_combined(
     plt.xlabel("Array size (number of elements)", fontsize=AXIS_LABEL_FONTSIZE)
     plt.ylabel("Speedup", fontsize=AXIS_LABEL_FONTSIZE)
 
-    plt.xticks(x, SIZE_LABELS, fontsize=TICK_LABEL_FONTSIZE)
+    plt.xticks(x, SIZE_LABELS, fontsize=TICK_LABEL_FONTSIZE, rotation=45)
     plt.yticks(fontsize=TICK_LABEL_FONTSIZE)
 
     if y_max is None:
@@ -157,11 +157,11 @@ def plot_bandwidth_combined(
     use_log_scale: bool = True,
 ):
     """Grouped bar chart comparing bandwidth for FP32 and FP16."""
-    x = list(range(len(sizes)))
+    x = [i * 1.6 for i in range(len(sizes))]  # Increase spacing between size categories
     width = 0.18
     gap = 0.08  # gap between FP32 and FP16 groups
 
-    plt.figure(figsize=(14, 7))
+    plt.figure(figsize=(18, 7))
 
     # FP32 bars (shifted left)
     plt.bar([i - width - gap/2 - width/2 for i in x], fp32_bw_unfused, width=width,
@@ -181,7 +181,7 @@ def plot_bandwidth_combined(
 
     plt.xlabel("Array size (number of elements)", fontsize=AXIS_LABEL_FONTSIZE)
     plt.ylabel("Memory bandwidth (GB/s)", fontsize=AXIS_LABEL_FONTSIZE)
-    plt.xticks(x, SIZE_LABELS, fontsize=TICK_LABEL_FONTSIZE)
+    plt.xticks(x, SIZE_LABELS, fontsize=TICK_LABEL_FONTSIZE, rotation=45)
     plt.yticks(fontsize=TICK_LABEL_FONTSIZE)
 
     all_vals = fp32_bw_unfused + fp32_bw_fused + fp16_bw_unfused + fp16_bw_fused
@@ -216,6 +216,7 @@ def generate_operation_plots(
     sizes=None,
     speedup_y_max: Optional[float] = None,
     bandwidth_y_max: Optional[float] = None,
+    use_log_scale: bool = True,
 ):
     """
     Generate all plots (time, speedup, bandwidth) for a single operation.
@@ -264,7 +265,265 @@ def generate_operation_plots(
         fp16_data["bw_unfused_std"], fp16_data["bw_fused_std"],
         fig_name=f"{op_name}_bandwidth.png",
         output_dir=output_dir,
-        y_max=bandwidth_y_max
+        y_max=bandwidth_y_max,
+        use_log_scale=use_log_scale
     )
 
     print(f" Generated {op_name} plots")
+
+
+def plot_time_graph_three_precisions(
+    sizes,
+    fp32_unfused, fp32_fused,
+    fp16_unfused, fp16_fused,
+    mixed_unfused, mixed_fused,
+    fp32_unfused_std, fp32_fused_std,
+    fp16_unfused_std, fp16_fused_std,
+    mixed_unfused_std, mixed_fused_std,
+    fig_name,
+    output_dir="."
+):
+    """Plot time comparison with FP32, FP16, and Mixed precision on same graph with error bars."""
+    plt.figure(figsize=(16, 7))
+
+    # FP32 lines
+    plt.errorbar(sizes, fp32_unfused, yerr=fp32_unfused_std, marker="o", linewidth=2,
+                 label="FP32 Unfused", capsize=3, color="tab:blue")
+    plt.errorbar(sizes, fp32_fused, yerr=fp32_fused_std, marker="s", linewidth=2,
+                 label="FP32 Fused", capsize=3, color="tab:blue", linestyle="--")
+
+    # FP16 lines
+    plt.errorbar(sizes, fp16_unfused, yerr=fp16_unfused_std, marker="o", linewidth=2,
+                 label="FP16 Unfused", capsize=3, color="tab:orange")
+    plt.errorbar(sizes, fp16_fused, yerr=fp16_fused_std, marker="s", linewidth=2,
+                 label="FP16 Fused", capsize=3, color="tab:orange", linestyle="--")
+
+    # Mixed lines
+    plt.errorbar(sizes, mixed_unfused, yerr=mixed_unfused_std, marker="o", linewidth=2,
+                 label="Mixed Unfused", capsize=3, color="tab:green")
+    plt.errorbar(sizes, mixed_fused, yerr=mixed_fused_std, marker="s", linewidth=2,
+                 label="Mixed Fused", capsize=3, color="tab:green", linestyle="--")
+
+    plt.xscale("log")
+    plt.yscale("log")
+
+    plt.xlabel("Array size (number of elements)", fontsize=AXIS_LABEL_FONTSIZE)
+    plt.ylabel("Execution time (μs)", fontsize=AXIS_LABEL_FONTSIZE)
+
+    plt.xticks(sizes, SIZE_LABELS, fontsize=TICK_LABEL_FONTSIZE, rotation=45)
+    plt.yticks(fontsize=TICK_LABEL_FONTSIZE)
+
+    plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
+    plt.legend(prop={"size": LEGEND_FONTSIZE})
+    _apply_axis_fonts()
+
+    plt.tight_layout()
+    filepath = os.path.join(output_dir, fig_name)
+    plt.savefig(filepath, dpi=300)
+    plt.close()
+    return filepath
+
+
+def plot_speedup_three_precisions(
+    sizes,
+    fp32_speedup, fp16_speedup, mixed_speedup,
+    fp32_speedup_std, fp16_speedup_std, mixed_speedup_std,
+    fig_name,
+    output_dir=".",
+    y_max: Optional[float] = None,
+):
+    """Bar chart comparing FP32, FP16, and Mixed precision speedups side by side with error bars."""
+    x = list(range(len(sizes)))
+    width = 0.25
+    gap = 0.04
+
+    plt.figure(figsize=(16, 7))
+
+    bars_fp32 = plt.bar([i - width - gap for i in x], fp32_speedup, width=width,
+                        yerr=fp32_speedup_std, capsize=3,
+                        label="FP32", color="tab:blue", edgecolor="black", alpha=0.8)
+    bars_fp16 = plt.bar([i for i in x], fp16_speedup, width=width,
+                        yerr=fp16_speedup_std, capsize=3,
+                        label="FP16", color="tab:orange", edgecolor="black", alpha=0.8)
+    bars_mixed = plt.bar([i + width + gap for i in x], mixed_speedup, width=width,
+                        yerr=mixed_speedup_std, capsize=3,
+                        label="Mixed (FP16+FP32)", color="tab:green", edgecolor="black", alpha=0.8)
+
+    plt.axhline(y=1.0, linestyle="--", linewidth=1.5, color="red", label="No speedup (1.0×)")
+
+    plt.xlabel("Array size (number of elements)", fontsize=AXIS_LABEL_FONTSIZE)
+    plt.ylabel("Speedup", fontsize=AXIS_LABEL_FONTSIZE)
+
+    plt.xticks(x, SIZE_LABELS, fontsize=TICK_LABEL_FONTSIZE, rotation=45)
+    plt.yticks(fontsize=TICK_LABEL_FONTSIZE)
+
+    if y_max is None:
+        y_max = max(max(fp32_speedup), max(fp16_speedup), max(mixed_speedup)) * 1.15
+    plt.ylim(0, y_max)
+
+    plt.grid(True, axis="y", linestyle="--", linewidth=0.5, alpha=0.6)
+
+    # Value labels on bars
+    for bar, val in zip(bars_fp32, fp32_speedup):
+        plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.03,
+                 f"{val:.2f}×", ha="center", va="bottom", fontsize=8, fontweight="bold",
+                 color="tab:blue")
+    for bar, val in zip(bars_fp16, fp16_speedup):
+        plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.03,
+                 f"{val:.2f}×", ha="center", va="bottom", fontsize=8, fontweight="bold",
+                 color="tab:orange")
+    for bar, val in zip(bars_mixed, mixed_speedup):
+        plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.03,
+                 f"{val:.2f}×", ha="center", va="bottom", fontsize=8, fontweight="bold",
+                 color="tab:green")
+
+    plt.legend(prop={"size": LEGEND_FONTSIZE})
+    _apply_axis_fonts()
+    plt.tight_layout()
+    filepath = os.path.join(output_dir, fig_name)
+    plt.savefig(filepath, dpi=300)
+    plt.close()
+    return filepath
+
+
+def plot_bandwidth_three_precisions(
+    sizes,
+    fp32_bw_unfused, fp32_bw_fused,
+    fp16_bw_unfused, fp16_bw_fused,
+    mixed_bw_unfused, mixed_bw_fused,
+    fp32_bw_unfused_std, fp32_bw_fused_std,
+    fp16_bw_unfused_std, fp16_bw_fused_std,
+    mixed_bw_unfused_std, mixed_bw_fused_std,
+    fig_name,
+    output_dir=".",
+    y_max: Optional[float] = None,
+    use_log_scale: bool = True,
+):
+    """Grouped bar chart comparing bandwidth for FP32, FP16, and Mixed precision."""
+    x = [i * 1.6 for i in range(len(sizes))]  # Increase spacing between size categories
+    width = 0.13
+    gap = 0.15
+
+    plt.figure(figsize=(18, 7))
+
+    # FP32 bars (left group)
+    plt.bar([i - width*2 - gap for i in x], fp32_bw_unfused, width=width,
+            yerr=fp32_bw_unfused_std, capsize=2,
+            label="FP32 Unfused", color="lightblue", edgecolor="black", alpha=0.8)
+    plt.bar([i - width - gap for i in x], fp32_bw_fused, width=width,
+            yerr=fp32_bw_fused_std, capsize=2,
+            label="FP32 Fused", color="steelblue", edgecolor="black", alpha=0.8)
+
+    # FP16 bars (middle group)
+    plt.bar([i for i in x], fp16_bw_unfused, width=width,
+            yerr=fp16_bw_unfused_std, capsize=2,
+            label="FP16 Unfused", color="lightsalmon", edgecolor="black", alpha=0.8)
+    plt.bar([i + width for i in x], fp16_bw_fused, width=width,
+            yerr=fp16_bw_fused_std, capsize=2,
+            label="FP16 Fused", color="tomato", edgecolor="black", alpha=0.8)
+
+    # Mixed bars (right group)
+    plt.bar([i + width*2 + gap for i in x], mixed_bw_unfused, width=width,
+            yerr=mixed_bw_unfused_std, capsize=2,
+            label="Mixed Unfused", color="lightgreen", edgecolor="black", alpha=0.8)
+    plt.bar([i + width*3 + gap for i in x], mixed_bw_fused, width=width,
+            yerr=mixed_bw_fused_std, capsize=2,
+            label="Mixed Fused", color="forestgreen", edgecolor="black", alpha=0.8)
+
+    plt.xlabel("Array size (number of elements)", fontsize=AXIS_LABEL_FONTSIZE)
+    plt.ylabel("Memory bandwidth (GB/s)", fontsize=AXIS_LABEL_FONTSIZE)
+    plt.xticks(x, SIZE_LABELS, fontsize=TICK_LABEL_FONTSIZE, rotation=45)
+    plt.yticks(fontsize=TICK_LABEL_FONTSIZE)
+
+    all_vals = (fp32_bw_unfused + fp32_bw_fused + fp16_bw_unfused + fp16_bw_fused +
+                mixed_bw_unfused + mixed_bw_fused)
+    if use_log_scale:
+        plt.yscale("log")
+        min_positive = min(v for v in all_vals if v > 0)
+        ymin = min_positive * 0.5
+        ymax = y_max if y_max is not None else max(all_vals) * 1.2
+        plt.ylim(ymin, ymax)
+    else:
+        if y_max is None:
+            y_max = max(all_vals) * 1.1
+        plt.ylim(0, y_max)
+
+    plt.grid(True, axis="y", linestyle="--", linewidth=0.5, alpha=0.4)
+    plt.legend(prop={"size": LEGEND_FONTSIZE}, loc="upper left")
+    _apply_axis_fonts()
+
+    plt.tight_layout()
+    filepath = os.path.join(output_dir, fig_name)
+    plt.savefig(filepath, dpi=300)
+    plt.close()
+    return filepath
+
+
+def generate_map_reduce_plots_three_precisions(
+    op_name: str,
+    fp32_data: dict,
+    fp16_data: dict,
+    mixed_data: dict,
+    output_dir: str,
+    sizes=None,
+    speedup_y_max: Optional[float] = None,
+    bandwidth_y_max: Optional[float] = None,
+    use_log_scale: bool = True,
+):
+    """
+    Generate plots comparing all three precisions (FP32, FP16, Mixed) for map reduce operations.
+    
+    Args:
+        op_name: Name of operation (e.g., "map_reduce_naive", "map_reduce_block")
+        fp32_data: Dictionary with FP32 benchmark data
+        fp16_data: Dictionary with FP16 benchmark data
+        mixed_data: Dictionary with Mixed precision benchmark data
+        output_dir: Directory to save plots
+        sizes: Array sizes (uses default SIZES if None)
+        speedup_y_max: Maximum y value for speedup plot
+        bandwidth_y_max: Maximum y value for bandwidth plot
+    """
+    if sizes is None:
+        sizes = SIZES
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Time plot
+    plot_time_graph_three_precisions(
+        sizes,
+        fp32_data["unfused"], fp32_data["fused"],
+        fp16_data["unfused"], fp16_data["fused"],
+        mixed_data["unfused"], mixed_data["fused"],
+        fp32_data["unfused_std"], fp32_data["fused_std"],
+        fp16_data["unfused_std"], fp16_data["fused_std"],
+        mixed_data["unfused_std"], mixed_data["fused_std"],
+        fig_name=f"{op_name}_time.png",
+        output_dir=output_dir
+    )
+
+    # Speedup plot
+    plot_speedup_three_precisions(
+        sizes,
+        fp32_data["speedup"], fp16_data["speedup"], mixed_data["speedup"],
+        fp32_data["speedup_std"], fp16_data["speedup_std"], mixed_data["speedup_std"],
+        fig_name=f"{op_name}_speedup.png",
+        output_dir=output_dir,
+        y_max=speedup_y_max
+    )
+
+    # Bandwidth plot
+    plot_bandwidth_three_precisions(
+        sizes,
+        fp32_data["bw_unfused"], fp32_data["bw_fused"],
+        fp16_data["bw_unfused"], fp16_data["bw_fused"],
+        mixed_data["bw_unfused"], mixed_data["bw_fused"],
+        fp32_data["bw_unfused_std"], fp32_data["bw_fused_std"],
+        fp16_data["bw_unfused_std"], fp16_data["bw_fused_std"],
+        mixed_data["bw_unfused_std"], mixed_data["bw_fused_std"],
+        fig_name=f"{op_name}_bandwidth.png",
+        output_dir=output_dir,
+        y_max=bandwidth_y_max,
+        use_log_scale=use_log_scale
+    )
+
+    print(f" Generated {op_name} plots (3 precisions)")

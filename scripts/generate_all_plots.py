@@ -72,29 +72,32 @@ def generate_gpu_plots(gpu_module, output_base_dir="plots"):
         **config["relu"]
     )
 
-    # Map Reduce Naive
-    print("\n[Map Reduce Naive]")
-    generate_operation_plots(
+    # Map Reduce Naive (all 3 precisions)
+    print("\n[Map Reduce Naive - All Precisions]")
+    from plot_utils import generate_map_reduce_plots_three_precisions
+    generate_map_reduce_plots_three_precisions(
         op_name="map_reduce_naive",
         fp32_data=gpu_module.MAP_REDUCE_NAIVE_FP32,
         fp16_data=gpu_module.MAP_REDUCE_NAIVE_FP16,
+        mixed_data=gpu_module.MAP_REDUCE_MIXED_NAIVE,
         output_dir=output_dir,
         sizes=SIZES,
         **config["map_reduce_naive"]
     )
 
-    # Map Reduce Block
-    print("\n[Map Reduce Block]")
-    generate_operation_plots(
+    # Map Reduce Block (all 3 precisions)
+    print("\n[Map Reduce Block - All Precisions]")
+    generate_map_reduce_plots_three_precisions(
         op_name="map_reduce_block",
         fp32_data=gpu_module.MAP_REDUCE_BLOCK_FP32,
         fp16_data=gpu_module.MAP_REDUCE_BLOCK_FP16,
+        mixed_data=gpu_module.MAP_REDUCE_MIXED_BLOCK,
         output_dir=output_dir,
         sizes=SIZES,
         **config["map_reduce_block"]
     )
-
-    print(f"\n✓ All plots for {display_name} saved to {output_dir}/")
+    
+    print(f"\n All plots for {display_name} saved to {output_dir}/")
     return output_dir
 
 
