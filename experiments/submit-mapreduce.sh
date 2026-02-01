@@ -11,4 +11,4 @@ pwd; hostname ; date
 
 cd ~/cudafusion/kernel-fusion/experiments || exit 1
 
-~/cudafusion/kernel-fusion/venv/bin/python main_a100.py
+~/cudafusion/kernel-fusion/venv/bin/python main_map_reduce_a100.py
