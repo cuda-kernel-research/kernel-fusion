@@ -527,3 +527,171 @@ def generate_map_reduce_plots_three_precisions(
     )
 
     print(f" Generated {op_name} plots (3 precisions)")
+
+
+def plot_time_comparison_all_gpus(
+    sizes,
+    gpu_data_list,
+    gpu_names,
+    gpu_display_names,
+    operation_name,
+    fig_name,
+    output_dir,
+    precision="fp32",
+    y_max=None
+):
+    """
+    Plot execution time comparison across multiple GPUs for a specific operation and precision.
+    
+    Args:
+        sizes: Array sizes
+        gpu_data_list: List of data dictionaries for each GPU
+        gpu_names: List of GPU short names (e.g., ['rtx3080', 't4', 'a100'])
+        gpu_display_names: List of GPU display names (e.g., ['RTX 3080', 'T4', 'A100'])
+        operation_name: Name of the operation (e.g., 'Add', 'FMA', 'ReLU')
+        fig_name: Output filename
+        output_dir: Directory to save plot
+        precision: 'fp32' or 'fp16'
+        y_max: Maximum y-axis value (optional)
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # GPU colors and markers
+    gpu_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
+    gpu_markers = ['o', 's', '^', 'D', 'v', 'p']
+    
+    fig, ax = plt.subplots(figsize=(16, 7))
+    
+    for idx, (data, gpu_name, display_name) in enumerate(zip(gpu_data_list, gpu_names, gpu_display_names)):
+        color = gpu_colors[idx % len(gpu_colors)]
+        marker = gpu_markers[idx % len(gpu_markers)]
+        
+        # Unfused
+        ax.errorbar(
+            sizes, data["unfused"], yerr=data["unfused_std"],
+            label=f"{display_name} Unfused",
+            marker=marker, markersize=8, linewidth=2,
+            capsize=4, capthick=1.5,
+            color=color, linestyle='-', alpha=0.8
+        )
+        
+        # Fused
+        ax.errorbar(
+            sizes, data["fused"], yerr=data["fused_std"],
+            label=f"{display_name} Fused",
+            marker=marker, markersize=8, linewidth=2,
+            capsize=4, capthick=1.5,
+            color=color, linestyle='--', alpha=0.8
+        )
+    
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("Array Size", fontsize=AXIS_LABEL_FONTSIZE)
+    ax.set_ylabel("Execution Time (μs)", fontsize=AXIS_LABEL_FONTSIZE)
+    ax.set_title(f"{operation_name} - {precision.upper()} - GPU Comparison", fontsize=AXIS_LABEL_FONTSIZE + 2)
+    ax.set_xticks(sizes)
+    ax.set_xticklabels(SIZE_LABELS, rotation=45, ha='right')
+    ax.grid(True, which="both", ls="-", alpha=0.2)
+    ax.legend(fontsize=LEGEND_FONTSIZE - 2, loc='best', ncol=2)
+    
+    if y_max is not None:
+        ax.set_ylim(top=y_max)
+    
+    _apply_axis_fonts()
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, fig_name), dpi=300, bbox_inches="tight")
+    plt.close()
+
+
+def plot_time_comparison_all_gpus_both_precisions(
+    sizes,
+    gpu_fp32_data_list,
+    gpu_fp16_data_list,
+    gpu_names,
+    gpu_display_names,
+    operation_name,
+    fig_name,
+    output_dir,
+    y_max=None
+):
+    """
+    Plot execution time comparison across multiple GPUs showing both FP32 and FP16 on same graph.
+    
+    Args:
+        sizes: Array sizes
+        gpu_fp32_data_list: List of FP32 data dictionaries for each GPU
+        gpu_fp16_data_list: List of FP16 data dictionaries for each GPU
+        gpu_names: List of GPU short names
+        gpu_display_names: List of GPU display names
+        operation_name: Name of the operation
+        fig_name: Output filename
+        output_dir: Directory to save plot
+        y_max: Maximum y-axis value (optional)
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # GPU colors
+    gpu_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
+    gpu_markers = ['o', 's', '^', 'D', 'v', 'p']
+    
+    fig, ax = plt.subplots(figsize=(18, 8))
+    
+    for idx, (fp32_data, fp16_data, gpu_name, display_name) in enumerate(
+        zip(gpu_fp32_data_list, gpu_fp16_data_list, gpu_names, gpu_display_names)
+    ):
+        color = gpu_colors[idx % len(gpu_colors)]
+        marker = gpu_markers[idx % len(gpu_markers)]
+        
+        # FP32 Unfused
+        ax.errorbar(
+            sizes, fp32_data["unfused"], yerr=fp32_data["unfused_std"],
+            label=f"{display_name} FP32 Unfused",
+            marker=marker, markersize=8, linewidth=2.5,
+            capsize=4, capthick=1.5,
+            color=color, linestyle='-', alpha=0.9
+        )
+        
+        # FP32 Fused
+        ax.errorbar(
+            sizes, fp32_data["fused"], yerr=fp32_data["fused_std"],
+            label=f"{display_name} FP32 Fused",
+            marker=marker, markersize=8, linewidth=2.5,
+            capsize=4, capthick=1.5,
+            color=color, linestyle='--', alpha=0.9
+        )
+        
+        # FP16 Unfused (lighter color)
+        ax.errorbar(
+            sizes, fp16_data["unfused"], yerr=fp16_data["unfused_std"],
+            label=f"{display_name} FP16 Unfused",
+            marker=marker, markersize=7, linewidth=2,
+            capsize=3, capthick=1.2,
+            color=color, linestyle='-', alpha=0.4
+        )
+        
+        # FP16 Fused (lighter color)
+        ax.errorbar(
+            sizes, fp16_data["fused"], yerr=fp16_data["fused_std"],
+            label=f"{display_name} FP16 Fused",
+            marker=marker, markersize=7, linewidth=2,
+            capsize=3, capthick=1.2,
+            color=color, linestyle='--', alpha=0.4
+        )
+    
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("Array Size", fontsize=AXIS_LABEL_FONTSIZE)
+    ax.set_ylabel("Execution Time (μs)", fontsize=AXIS_LABEL_FONTSIZE)
+    ax.set_title(f"{operation_name} - GPU Comparison (FP32 & FP16)", fontsize=AXIS_LABEL_FONTSIZE + 2)
+    ax.set_xticks(sizes)
+    ax.set_xticklabels(SIZE_LABELS, rotation=45, ha='right')
+    ax.grid(True, which="both", ls="-", alpha=0.2)
+    ax.legend(fontsize=LEGEND_FONTSIZE - 3, loc='best', ncol=2)
+    
+    if y_max is not None:
+        ax.set_ylim(top=y_max)
+    
+    _apply_axis_fonts()
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, fig_name), dpi=300, bbox_inches="tight")
+    plt.close()
