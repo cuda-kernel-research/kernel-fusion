@@ -2,7 +2,7 @@
 # 10 runs per configuration
 
 GPU_NAME = "T4"
-GPU_DISPLAY_NAME = "NVIDIA T4"
+GPU_DISPLAY_NAME = "T4"
 
 # ==============================================================================
 # Element-wise Addition

@@ -2,7 +2,7 @@
 # 10 runs per configuration
 
 GPU_NAME = "A100"
-GPU_DISPLAY_NAME = "NVIDIA A100"
+GPU_DISPLAY_NAME = "A100"
 
 # ==============================================================================
 # Element-wise Addition
