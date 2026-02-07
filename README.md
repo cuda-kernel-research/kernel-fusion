@@ -148,13 +148,6 @@ Each benchmark reports:
 - **Speedup** — ratio of unfused to fused time
 - **Effective bandwidth** (GB/s) — data movement rate for each variant
 
-Key takeaways:
-
-- Fusion provides the largest speedup in **memory-bound, element-wise kernels** where the dominant cost is global memory traffic.
-- For **reduction workloads**, the block-level variant with shared memory benefits significantly more from fusion than the naive atomic-based variant.
-- Speedups are **consistent across all three GPU architectures**, confirming that fusion is a hardware-agnostic optimisation for this class of workloads.
-- **FP16 kernels** transfer half the data per element, but fusion still provides comparable relative speedups.
-
 <!--
 ## Citation
 
