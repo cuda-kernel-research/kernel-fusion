@@ -148,16 +148,26 @@ Each benchmark reports:
 - **Speedup** — ratio of unfused to fused time
 - **Effective bandwidth** (GB/s) — data movement rate for each variant
 
-<!--
 ## Citation
 
 If this repository or its findings are used as part of academic or industrial research, please cite this paper as:
 ```
-OVDE CEMO DODATI CITAT
+M. Dodović, M. Veselinović, M. Mišić, Analyzing the Impact of Kernel Fusion on GPU Tensor Operation Performance: A Systematic Performance Study, Electronics , Vol. 15, No. 5, Mar, 2026
 ```
 
 with the following BibTeX code:
 ```
-OVDE CEMO DODATI BIBTEX KAD IZADJE
+@Article{electronics15051034,
+author = {Dodović, Matija and Veselinović, Milica and Mišić, Marko},
+title = {Analyzing the Impact of Kernel Fusion on GPU Tensor Operation Performance: A Systematic Performance Study},
+journal = {Electronics},
+volume = {15},
+year = {2026},
+number = {5},
+article-number = {1034},
+url = {https://www.mdpi.com/2079-9292/15/5/1034},
+issn = {2079-9292},
+abstract = {Large numbers of small tensor kernels are executed by GPUs in modern deep learning frameworks, where total performance is frequently constrained by memory bandwidth and kernel launch overheads. Systems such as TensorFlow XLA, PyTorch JIT, and cuDNN often use kernel fusion, which is defined as combining many tensor operations into a single GPU kernel, to reduce intermediate memory transfers and boost efficiency. Nevertheless, it is difficult to measure the true performance impact of fusion on both isolated tensor operations and end-to-end model execution. An experimental investigation of kernel fusion on three different NVIDIA GPUs is presented in this work. For four sample tensor operations: element-wise addition, fused multiply–add, linear transformation with ReLU activation, and map-reduce, we build fused and unfused CUDA kernels using FP32, FP16, and mixed-precision arithmetics. We measure execution time, speedup, and effective memory bandwidth across a range of input sizes. For memory-bound and activation-heavy workloads, fusion yields consistent speedups between 1.5× and 3.13×, particularly for small and medium inputs where kernel launch overhead is significant. For operations dominated by atomic updates, the benefit is limited to between 1.01× and 1.44×. When the reduction strategy is reformulated using block-level shared-memory aggregation, kernel fusion becomes effective again, achieving speedups of up to 2× by eliminating global synchronization bottlenecks. We further evaluate the effect of fusion on image classification models using PyTorch 2.10.0 JIT, achieving 1.54× to 1.83× faster inference. Our results provide practical guidelines on when kernel fusion is most effective.},
+DOI = {10.3390/electronics15051034}
+}
 ```
--->
